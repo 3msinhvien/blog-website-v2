@@ -1,5 +1,6 @@
 import './styles.css';
-import {useState, useEffect, use} from 'react';
+import {useState, useEffect} from 'react';
+import NewPost from './NewPost';
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,7 +14,6 @@ import {
 function App() {
 
   const [blog, setBlog] = useState([])
-  const [selected, setSelected] = useState(null)
 
   useEffect(() => {
     fetch ("http://localhost:8080")
@@ -28,18 +28,7 @@ function App() {
       })
   },[])
 
-  const loadBlog = (slug) => {
-    fetch (`http://localhost:8080/post/${slug}`)
-      .then ((res) => {
-        return res.json()
-      })
-      .then ((data) => {
-        setSelected(data)
-      })
-      .catch((error) => {
-        console.error('Error fetching blog post:', error)
-      })
-  }
+  // Removed unused selected state and loadBlog function
 
   function Home() {
     return (
@@ -83,30 +72,41 @@ function App() {
   function PostList() {
     return (
       <ul>
-        {Object.entries(blog).map(
-          ([slug, {title}]) => (
-            <li key={slug}>
-              <Link to={`/post/${slug}`}>
-              <h3>{title}</h3>
-              </Link>
-            </li>
-          )
-        )}
+        {blog.map((post) => (
+          <li key={post.slug}>
+            <Link to={`/post/${post.slug}`}>
+              <h3>{post.title}</h3>
+            </Link>
+          </li>
+        ))}
       </ul>
     )
   }
 
   function PostDetail() {
-    const {slug} = useParams();
-    const post = blog[slug];
-    if (!post) {
-      return <div>Post not found</div>;
-    }
-    const {title, content} = post;
+    const { slug } = useParams()
+    const [post, setPost] = useState(null)
+    const [error, setError] = useState(null)
+
+    useEffect(() => {
+      setError(null)
+      setPost(null)
+      fetch(`http://localhost:8080/post/${slug}`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Not found')
+          return res.json()
+        })
+        .then((data) => setPost(data))
+        .catch((err) => setError(err.message))
+    }, [slug])
+
+    if (error) return <div>Post not found</div>
+    if (!post) return <div>Loading...</div>
+
     return (
       <div>
-        <h3>{title}</h3>
-        <p>{content}</p>
+        <h3>{post.title}</h3>
+        <p>{post.description}</p>
       </div>
     )
   }
@@ -122,6 +122,9 @@ function App() {
         <Link to='/post'>
           Blog
         </Link>
+        <Link to='/new'>
+          New Post
+        </Link>
       </nav>
       
       <Routes>
@@ -130,6 +133,7 @@ function App() {
         <Route path ='/post' element={<Posts />}>
           <Route index element={<PostList />} />
         </Route>
+        <Route path='/new' element={<NewPost />} />
         <Route path ='/post/:slug' element={<PostDetail />}></Route>
         <Route path ='*' element={<NoMatch />}></Route>
       </Routes>
