@@ -1,0 +1,21 @@
+{
+  "setupTasks": [
+    {
+      "name": "Auto sync & install dependencies",
+      "command": "git fetch origin && git reset --hard origin/master && npm install --prefix backend && npm install --prefix frontend"
+    }
+  ],
+  "tasks": {
+    "start-frontend": {
+      "name": "Start frontend (React)",
+      "command": "cd frontend && PORT=3000 npm start",
+      "runAtStart": true,
+      "previewPort": 3000
+    },
+    "start-backend": {
+      "name": "Start backend (Express)",
+      "command": "cd backend && PORT=8080 npm start",
+      "runAtStart": true
+    }
+  }
+}
