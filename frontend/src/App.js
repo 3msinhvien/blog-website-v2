@@ -1,6 +1,9 @@
 import './styles.css';
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import NewPost from './NewPost';
+import Login from './Login'
+import PostLists from './PostLists'
+import Post from './Post'
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,17 +19,17 @@ function App() {
   const [blog, setBlog] = useState([])
 
   useEffect(() => {
-    fetch ("http://localhost:8080")
-      .then ((res) => {
+    fetch("http://localhost:8080")
+      .then((res) => {
         return res.json()
       })
-      .then ((data)=> {
+      .then((data) => {
         setBlog(data)
       })
       .catch((error) => {
         console.error('Error fetching blog data:', error)
       })
-  },[])
+  }, [])
 
   // Removed unused selected state and loadBlog function
 
@@ -69,47 +72,6 @@ function App() {
     )
   }
 
-  function PostList() {
-    return (
-      <ul>
-        {blog.map((post) => (
-          <li key={post.slug}>
-            <Link to={`/post/${post.slug}`}>
-              <h3>{post.title}</h3>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    )
-  }
-
-  function PostDetail() {
-    const { slug } = useParams()
-    const [post, setPost] = useState(null)
-    const [error, setError] = useState(null)
-
-    useEffect(() => {
-      setError(null)
-      setPost(null)
-      fetch(`http://localhost:8080/post/${slug}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Not found')
-          return res.json()
-        })
-        .then((data) => setPost(data))
-        .catch((err) => setError(err.message))
-    }, [slug])
-
-    if (error) return <div>Post not found</div>
-    if (!post) return <div>Loading...</div>
-
-    return (
-      <div>
-        <h3>{post.title}</h3>
-        <p>{post.description}</p>
-      </div>
-    )
-  }
   return (
     <Router>
       <nav>
@@ -125,17 +87,21 @@ function App() {
         <Link to='/new'>
           New Post
         </Link>
+        <Link to='/login'>
+          Login
+        </Link>
       </nav>
-      
+
       <Routes>
-        <Route path ='/' element={<Home />}></Route>
-        <Route path ='/about' element={<About />}></Route>
-        <Route path ='/post' element={<Posts />}>
-          <Route index element={<PostList />} />
+        <Route path='/' element={<Home />}></Route>
+        <Route path='/about' element={<About />}></Route>
+        <Route path='/post' element={<Posts />}>
+          <Route index element={<PostLists />} />
         </Route>
         <Route path='/new' element={<NewPost />} />
-        <Route path ='/post/:slug' element={<PostDetail />}></Route>
-        <Route path ='*' element={<NoMatch />}></Route>
+        <Route path='/post/:slug' element={<Post />}></Route>
+        <Route path='/login' element={<Login />}></Route>
+        <Route path='*' element={<NoMatch />}></Route>
       </Routes>
     </Router>
   );

@@ -8,7 +8,7 @@ const app = express()
 const port = 8080
 
 // Enable CORS for all routes
-app.use(cors()) 
+app.use(cors())
 app.use(express.json())
 app.use(morgan('combined'))
 
@@ -17,15 +17,15 @@ app.get('/', (req, res) => {
   res.json(BlogPosts)
 })
 
-//api 2: get blog detail by slug
+// api 2: get blog detail by slug
 
-app.get('/post/:slug', (req, res) => {
-  const post = BlogPosts.find(p => p.slug === req.params.slug)
-  if (!post) {
-    return res.status(404).json({ message: 'Blog post not found' })
-  }
-  return res.json(post)
-})
+// app.get('/post/:slug', (req, res) => {
+//   const post = BlogPosts.find(p => p.slug === req.params.slug)
+//   if (!post) {
+//     return res.status(404).json({ message: 'Blog post not found' })
+//   }
+//   return res.json(post)
+// })
 
 // api 3: create a new blog post
 app.post('/api/post', (req, res) => {
@@ -44,6 +44,31 @@ app.post('/api/post', (req, res) => {
   BlogPosts.push(post)
   // Keep response aligned with guide
   return res.status(200).send({ message: 'Posted successful' })
+})
+
+// api 4: login 
+app.post("/api/login", (req, res) => {
+  const cred = {
+    username: req.body.username,
+    password: req.body.password
+  };
+  if (cred.username === "admin" && cred.password === "123") {
+    res.status(200).send({ message: "Login successful" });
+  }
+  else {
+    res.status(400).send({ message: "Login failed" })
+  }
+});
+
+// api 5 + 6: Get post list and post detail
+app.get("/api/posts", (req, res) => {
+  res.send(JSON.stringify(BlogPosts));
+})
+app.get("/api/posts/:slug", (req, res) => {
+  const slug = req.params.slug;
+  const post = BlogPosts.find((element) => element.slug === slug);
+  if (post) res.send(JSON.stringify(post));
+  else res.status(404).send("Not found");
 })
 
 app.listen(port, () => {
