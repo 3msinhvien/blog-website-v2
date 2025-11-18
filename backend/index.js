@@ -4,6 +4,7 @@ const cors = require('cors')
 // Legacy blog data kept for reference (not used by endpoints now)
 // const blog = require('./data/blog')
 const { BlogPosts } = require('./data/BlogPosts')
+const {Users} = require('./data/Users')
 const app = express()
 const port = 8080
 
@@ -69,6 +70,19 @@ app.get("/api/posts/:slug", (req, res) => {
   const post = BlogPosts.find((element) => element.slug === slug);
   if (post) res.send(JSON.stringify(post));
   else res.status(404).send("Not found");
+})
+
+app.post("/api/addUser", (req, res) => {
+    const {username, password} = req.body || {} ;
+    if (!username || !password) {
+      res.status(400).send({message:"Username va password khong duoc trong"})
+    }
+      if (Users.some(u => u.username === username)) {
+    return res.status(409).json({ message: 'Username already exists' })   
+  }
+    const user = {username, password}
+    Users.push(user)
+    res.status(200).send({message:"User created"})
 })
 
 app.listen(port, () => {
