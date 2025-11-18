@@ -4,6 +4,8 @@ import NewPost from './NewPost';
 import Login from './Login'
 import PostLists from './PostLists'
 import Post from './Post'
+import ProtectedRoute from './ProtectedRoute'
+import Stats from './Stats'
 import {
   BrowserRouter as Router,
   Routes,
@@ -17,6 +19,11 @@ import {
 function App() {
 
   const [blog, setBlog] = useState([])
+  const [user, setUser] = useState(null)
+
+  const logOut = () => {
+    setUser(null)
+  }
 
   useEffect(() => {
     fetch("http://localhost:8080")
@@ -72,36 +79,39 @@ function App() {
     )
   }
 
+  function AppLayout() {
+    return (
+      <>
+        <nav style={{ margin: 10 }}>
+          <Link to="/" style={{ padding: 5 }}> Home </Link>
+          <Link to="/posts" style={{ padding: 5 }}> Posts </Link>
+          <Link to="/about" style={{ padding: 5 }}> About </Link>
+          <span> | </span>
+          {user && <Link to="/stats" style={{ padding: 5 }}> Stats </Link>}
+          {user && <Link to="/newpost" style={{ padding: 5 }}> New Post </Link>}
+          {!user && <Link to="/login" style={{ padding: 5 }}> Login </Link>}
+          {user && <span onClick={logOut} style={{ padding: 5, cursor: 'pointer' }}> Logout </span>}
+        </nav>
+        <Outlet />
+      </>
+    )
+  }
+
   return (
     <Router>
-      <nav>
-        <Link to='/'>
-          Home
-        </Link>
-        <Link to='/about'>
-          About
-        </Link>
-        <Link to='/post'>
-          Blog
-        </Link>
-        <Link to='/new'>
-          New Post
-        </Link>
-        <Link to='/login'>
-          Login
-        </Link>
-      </nav>
-
       <Routes>
-        <Route path='/' element={<Home />}></Route>
-        <Route path='/about' element={<About />}></Route>
-        <Route path='/post' element={<Posts />}>
-          <Route index element={<PostLists />} />
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/posts" element={<Posts />}>
+            <Route index element={<PostLists />} />
+            <Route path=":slug" element={<Post />} />
+          </Route>
+          <Route path="/about" element={<About />} />
+          <Route path="/login" element={<Login onLogin={setUser} />} />
+          <Route path="/stats" element={<ProtectedRoute user={user}><Stats /></ProtectedRoute>} />
+          <Route path="/newpost" element={<ProtectedRoute user={user}><NewPost /></ProtectedRoute>} />
+          <Route path="*" element={<NoMatch />} />
         </Route>
-        <Route path='/new' element={<NewPost />} />
-        <Route path='/post/:slug' element={<Post />}></Route>
-        <Route path='/login' element={<Login />}></Route>
-        <Route path='*' element={<NoMatch />}></Route>
       </Routes>
     </Router>
   );

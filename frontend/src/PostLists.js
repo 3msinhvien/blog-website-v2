@@ -1,5 +1,5 @@
 import React from "react";
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom"
 
 export default function PostLists() {
@@ -10,9 +10,9 @@ export default function PostLists() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch (URL);
+                const response = await fetch(URL);
                 if (!response.ok) {
-                    throw new Error (`HTTP error! Status: ${response.status}`);
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 const result = await response.json();
                 setData(result);
@@ -20,21 +20,21 @@ export default function PostLists() {
             }
             catch (error) {
                 console.error("Error fetching data:", error);
-                setError ("An error occurred while fetching the data.");
+                setError("An error occurred while fetching the data.");
                 setLoading(false);
             }
         }
         fetchData();
-    }, []); 
+    }, []);
     return (
-    <ul>
-        {data.map((d) => (
-            <li key={d.slug}>
-                <Link to={`/post/${d.slug}`}>
-                    <h3>{d.title}</h3>
-                </Link>
-            </li>
-        ))}
-    </ul>
-)
+        <ul>
+            {data.map((d) => (
+                <li key={d.slug}>
+                    <Link to={`/posts/${d.slug}`}>
+                        <h3>{d.title}</h3>
+                    </Link>
+                </li>
+            ))}
+        </ul>
+    )
 }
